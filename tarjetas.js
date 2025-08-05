@@ -3,7 +3,7 @@
 
 // Configuración de la API
 const API_CONFIG = {
-    baseUrl: 'http://localhost/DragonBallZ/api/api.php',
+    baseUrl: 'http://localhost/ejercicio_login_sesion/api/api.php',
     endpoints: {
         todasTarjetas: '?seccion=tarjetas&accion=todas',
         misTarjetas: '?seccion=tarjetas&accion=mis_tarjetas',
