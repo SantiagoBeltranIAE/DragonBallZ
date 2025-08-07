@@ -3,7 +3,7 @@
 
 // Configuración de la API
 const API_CONFIG = {
-    baseUrl: 'http://localhost/ejercicio_login_sesion/api/api.php',
+    baseUrl: 'http://localhost/DragonBallZ/api/api.php',
     endpoints: {
         todasTarjetas: '?seccion=tarjetas&accion=todas',
         misTarjetas: '?seccion=tarjetas&accion=mis_tarjetas',
@@ -61,7 +61,9 @@ async function verificarSesionYCargarTarjetas() {
  */
 async function cargarMisTarjetas() {
     try {
-        const response = await fetch(API_CONFIG.baseUrl + API_CONFIG.endpoints.misTarjetas);
+        const response = await fetch(API_CONFIG.baseUrl + API_CONFIG.endpoints.misTarjetas, {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.success) {

@@ -33,13 +33,23 @@ try {
                     echo json_encode(["success" => false, "error" => "Método no permitido para login"]);
                 }
                 break;
-                
-            
+
+            case 'verificar':
+                if ($requestMethod === "GET") {
+                    VerificarSesion();
+                } else {
+                    echo json_encode(["success" => false, "error" => "Método no permitido para verificar"]);
+                }
+                break;
+
             case 'logout':
-               //Cerrar sesión
-                
-           
-                
+                if ($requestMethod === "POST") {
+                    Logout();
+                } else {
+                    echo json_encode(["success" => false, "error" => "Método no permitido para logout"]);
+                }
+                break;
+
             default:
                 echo json_encode(["success" => false, "error" => "Acción de usuarios no válida"]);
         }
