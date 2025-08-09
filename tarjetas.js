@@ -61,9 +61,7 @@ async function verificarSesionYCargarTarjetas() {
  */
 async function cargarMisTarjetas() {
     try {
-        const response = await fetch(API_CONFIG.baseUrl + API_CONFIG.endpoints.misTarjetas, {
-            credentials: 'include'
-        });
+        const response = await fetch(API_CONFIG.baseUrl + API_CONFIG.endpoints.misTarjetas);
         const data = await response.json();
         
         if (data.success) {

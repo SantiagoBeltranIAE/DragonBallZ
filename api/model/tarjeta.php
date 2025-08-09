@@ -1,32 +1,27 @@
 <?php
-require_once __DIR__ . '/../../conexion.php';
-
 class Tarjeta {
-    public static function todas() {
-        global $conn;
-        $sql = "SELECT * FROM tarjetas ORDER BY nivel_poder DESC";
-        $result = $conn->query($sql);
-        $tarjetas = [];
-        while ($row = $result->fetch_assoc()) {
-            $tarjetas[] = $row;
-        }
-        return $tarjetas;
+    private $conn;
+
+    public function __construct($db) {
+        $this->conn = $db;
     }
 
-    public static function porUsuario($usuario_id) {
-        global $conn;
-        $usuario_id = intval($usuario_id);
-        $sql = "SELECT t.*, ut.nivel_carta, ut.experiencia_carta, ut.favorita
-                FROM usuario_tarjetas ut
-                INNER JOIN tarjetas t ON ut.tarjeta_id = t.id
-                WHERE ut.usuario_id = $usuario_id
-                ORDER BY ut.favorita DESC, ut.nivel_carta DESC";
-        $result = $conn->query($sql);
-        $tarjetas = [];
-        while ($row = $result->fetch_assoc()) {
-            $tarjetas[] = $row;
-        }
-        return $tarjetas;
+    public function obtenerTodas() {
+        $sql = "SELECT * FROM tarjetas ORDER BY id DESC";
+        $result = $this->conn->query($sql);
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function obtenerTarjetasUsuario($usuario_id) {
+        $sql = "SELECT t.*, ut.fecha_obtencion
+                FROM tarjetas t
+                INNER JOIN usuario_tarjetas ut ON t.id = ut.tarjeta_id
+                WHERE ut.usuario_id = ?
+                ORDER BY ut.fecha_obtencion DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $usuario_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 }
-?>

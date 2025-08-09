@@ -33,27 +33,55 @@ try {
                     echo json_encode(["success" => false, "error" => "Método no permitido para login"]);
                 }
                 break;
-
-            case 'verificar':
-                if ($requestMethod === "GET") {
-                    VerificarSesion();
-                } else {
-                    echo json_encode(["success" => false, "error" => "Método no permitido para verificar"]);
-                }
-                break;
-
-            case 'logout':
-                if ($requestMethod === "POST") {
-                    Logout();
-                } else {
-                    echo json_encode(["success" => false, "error" => "Método no permitido para logout"]);
-                }
-                break;
-
-            default:
-                echo json_encode(["success" => false, "error" => "Acción de usuarios no válida"]);
-        }
+                
+            
+          case 'logout':
+    if ($requestMethod === "POST") {
+        session_start();
+        session_destroy();
+        echo json_encode(["success" => true, "message" => "👋 Sesión cerrada"]);
+    } else {
+        echo json_encode(["success" => false, "error" => "Método no permitido para logout"]);
     }
+    break;
+
+case 'verificar':
+    session_start();
+    if (isset($_SESSION['usuario_id'])) {
+        echo json_encode([
+            "success" => true,
+            "logueado" => true,
+            "usuario" => [
+                "id" => $_SESSION['usuario_id'],
+                "username" => $_SESSION['username']
+            ]
+        ]);
+    } else {
+        echo json_encode(["success" => true, "logueado" => false]);
+    }
+    break;
+
+case 'perfil':
+    if ($requestMethod === "GET") {
+        session_start();
+        if (!isset($_SESSION['usuario_id'])) {
+            echo json_encode(["success" => false, "error" => "🔒 Debe iniciar sesión"]);
+            break;
+        }
+        echo json_encode([
+            "success" => true,
+            "perfil" => [
+                "id" => $_SESSION['usuario_id'],
+                "username" => $_SESSION['username'],
+                "nivel" => "Saiyajin", // ejemplo
+                "poder" => 9001 // ejemplo
+            ]
+        ]);
+    } else {
+        echo json_encode(["success" => false, "error" => "Método no permitido para perfil"]);
+    }
+    break;
+
     
     // ====================================
     // RUTAS PARA TARJETAS

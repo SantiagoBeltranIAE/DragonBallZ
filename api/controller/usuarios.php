@@ -1,52 +1,23 @@
 <?php
-require_once __DIR__ . '/../model/usuario.php';
 session_start();
+require_once "../conexion.php";
+require_once "../model/usuario.php";
 
-function Login($username, $password) {
-    $usuario = Usuario::login($username, $password);
+$db = conectarDB();
+$usuarioModel = new Usuario($db);
+
+if ($_GET['accion'] === 'login') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    $usuario = $usuarioModel->login($username, $password);
+
     if ($usuario) {
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['username'] = $usuario['username'];
-        echo json_encode([
-            "success" => true,
-            "mensaje" => "Login exitoso",
-            "usuario" => [
-                "id" => $usuario['id'],
-                "username" => $usuario['username'],
-                "nombre_completo" => $usuario['nombre_completo']
-            ]
-        ]);
+        header("Location: ../tarjetas.html");
+        exit();
     } else {
-        echo json_encode([
-            "success" => false,
-            "error" => "Credenciales incorrectas"
-        ]);
+        echo json_encode(["error" => "Credenciales inválidas"]);
     }
 }
-
-function Logout() {
-    session_destroy();
-    echo json_encode([
-        "success" => true,
-        "mensaje" => "Sesión cerrada"
-    ]);
-}
-
-function VerificarSesion() {
-    if (isset($_SESSION['usuario_id'])) {
-        echo json_encode([
-            "success" => true,
-            "logueado" => true,
-            "usuario" => [
-                "id" => $_SESSION['usuario_id'],
-                "username" => $_SESSION['username']
-            ]
-        ]);
-    } else {
-        echo json_encode([
-            "success" => true,
-            "logueado" => false
-        ]);
-    }
-}
-?>

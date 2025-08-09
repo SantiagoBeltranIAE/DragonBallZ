@@ -1,30 +1,21 @@
 <?php
-require_once __DIR__ . '/../model/tarjeta.php';
 session_start();
+require_once "../conexion.php";
+require_once "../model/tarjeta.php";
 
-function obtenerMisTarjetas() {
+$db = conectarDB();
+$tarjetaModel = new Tarjeta($db);
+
+if ($_GET['accion'] === 'mis_tarjetas') {
     if (!isset($_SESSION['usuario_id'])) {
-        echo json_encode([
-            "success" => false,
-            "requiere_login" => true,
-            "error" => "Debes iniciar sesión para ver tus tarjetas"
-        ]);
-        return;
+        echo json_encode(["error" => "No hay sesión activa"]);
+        exit();
     }
-    $tarjetas = Tarjeta::porUsuario($_SESSION['usuario_id']);
-    echo json_encode([
-        "success" => true,
-        "tarjetas" => $tarjetas,
-        "total" => count($tarjetas)
-    ]);
+    $tarjetas = $tarjetaModel->obtenerTarjetasUsuario($_SESSION['usuario_id']);
+    echo json_encode($tarjetas);
 }
 
-function obtenerTodasTarjetas() {
-    $tarjetas = Tarjeta::todas();
-    echo json_encode([
-        "success" => true,
-        "tarjetas" => $tarjetas,
-        "total" => count($tarjetas)
-    ]);
+if ($_GET['accion'] === 'todas') {
+    $tarjetas = $tarjetaModel->obtenerTodas();
+    echo json_encode($tarjetas);
 }
-?>
