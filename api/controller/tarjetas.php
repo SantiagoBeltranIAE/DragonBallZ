@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once "../conexion.php";
-require_once "../model/tarjeta.php";
+require_once "/../../conexion.php";
+require_once "/../model/tarjeta.php";
 
 $db = conectarDB();
 $tarjetaModel = new Tarjeta($db);
