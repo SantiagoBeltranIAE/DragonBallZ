@@ -1,23 +1,29 @@
 <?php
-session_start();
-require_once "/../../conexion.php";
-require_once "/../model/usuario.php";
+require_once __DIR__ . "/../model/usuario.php";
+require_once __DIR__ . "/../../conexion.php";
 
-$db = conectarDB();
-$usuarioModel = new Usuario($db);
-
-if ($_GET['accion'] === 'login') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+function loginUsuario($username, $password) {
+    session_start();
+    $db = conectarDB();
+    $usuarioModel = new Usuario($db);
 
     $usuario = $usuarioModel->login($username, $password);
 
     if ($usuario) {
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['username'] = $usuario['username'];
-        header("Location: ../tarjetas.html");
-        exit();
+
+        echo json_encode([
+            "success" => true,
+            "message" => "🚀 Bienvenido",
+            "usuario" => [
+                "id" => $usuario['id'],
+                "username" => $usuario['username']
+            ]
+        ]);
     } else {
-        echo json_encode(["error" => "Credenciales inválidas"]);
+        echo json_encode(["success" => false, "error" => "Credenciales inválidas"]);
     }
 }
+
+?>

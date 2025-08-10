@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Torneo de Artes Marciales - Dragon Ball Z</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div class="login-container">
@@ -14,15 +14,15 @@
             <!-- Mensaje de estado -->
             <div id="message" class="message" style="display: none;"></div>
             
-            <form id="loginForm" action="http://localhost/DragonBallZ/api/api.php?seccion=usuarios&accion=login" method="POST">
+            <form id="loginForm" method="POST" style="display: block;">
                 <div class="form-group">
                     <label for="username">🥋 Nombre del Guerrero:</label>
-                    <input type="text" id="username" name="username" placeholder="Ej: goku, vegeta, gohan..." required>
+                    <input type="text" id="username" name="username" placeholder="Ej: goku, vegeta, gohan..." required />
                 </div>
                 
                 <div class="form-group">
                     <label for="password">⚡ Código de Poder:</label>
-                    <input type="password" id="password" name="password" placeholder="Tu nivel de poder secreto" required>
+                    <input type="password" id="password" name="password" placeholder="Tu nivel de poder secreto" required />
                 </div>
                 
                 <div class="form-group">
@@ -36,22 +36,105 @@
                     <a href="#" class="forgot-password">¿Olvidaste tu poder de combate?</a>
                 </div>
             </form>
+
+            <!-- Info si ya está logueado -->
+            <div id="loggedInfo" style="display:none;">
+                <p>🥋 Ya estás logueado como <strong id="loggedUsername"></strong></p>
+                <button id="logoutBtn">Cerrar sesión</button>
+                <br/>
+                <a href="tarjetas.html" class="nav-link">🚀 Ver mis tarjetas</a>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Mostrar mensaje de error si viene de un login fallido
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        
-        if (error === 'credenciales_incorrectas') {
-            const messageDiv = document.getElementById('message');
-            messageDiv.innerHTML = '<div class="error-msg">❌ Credenciales incorrectas. ¡Tu poder no es suficiente!</div>';
-            messageDiv.style.display = 'block';
-            
-            // Limpiar URL
-            window.history.replaceState({}, document.title, window.location.pathname);
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const messageDiv = document.getElementById('message');
+    const loggedInfo = document.getElementById('loggedInfo');
+    const loggedUsername = document.getElementById('loggedUsername');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const usernameInput = document.getElementById('username');
+
+    // Función para mostrar mensaje de error
+    function showMessage(msg) {
+        messageDiv.style.display = 'block';
+        messageDiv.innerHTML = `<div class="error-msg">${msg}</div>`;
+    }
+
+    // Al cargar la página, verifico si hay sesión activa
+    async function verificarSesion() {
+        try {
+            const res = await fetch('http://localhost/DragonBallZ/api/api.php?seccion=usuarios&accion=verificar');
+            const data = await res.json();
+
+            if (data.success && data.logueado) {
+                // Mostrar info y ocultar form
+                loginForm.style.display = 'none';
+                loggedInfo.style.display = 'block';
+                loggedUsername.textContent = data.usuario.username;
+                usernameInput.value = data.usuario.username;
+            } else {
+                // Mostrar form y ocultar info
+                loginForm.style.display = 'block';
+                loggedInfo.style.display = 'none';
+                usernameInput.value = '';
+            }
+        } catch {
+            showMessage('Error al verificar sesión.');
         }
-    </script>
+    }
+
+    // Manejar submit de login con fetch
+    loginForm.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        messageDiv.style.display = 'none';
+        messageDiv.innerHTML = '';
+
+        const username = loginForm.username.value.trim();
+        const password = loginForm.password.value.trim();
+
+        try {
+            const response = await fetch('http://localhost/DragonBallZ/api/api.php?seccion=usuarios&accion=login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ username, password })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.href = 'tarjetas.html';
+            } else {
+                showMessage(data.error || 'Credenciales incorrectas');
+            }
+        } catch {
+            showMessage('Error de conexión con el servidor.');
+        }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            const res = await fetch('http://localhost/DragonBallZ/api/api.php?seccion=usuarios&accion=logout', {
+                method: 'POST'
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Volver a mostrar form
+                loginForm.style.display = 'block';
+                loggedInfo.style.display = 'none';
+                usernameInput.value = '';
+                messageDiv.style.display = 'none';
+                messageDiv.innerHTML = '';
+            } else {
+                showMessage('Error al cerrar sesión.');
+            }
+        } catch {
+            showMessage('Error al cerrar sesión.');
+        }
+    });
+
+    verificarSesion();
+</script>
 </body>
 </html>

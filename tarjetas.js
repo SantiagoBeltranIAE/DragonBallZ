@@ -26,9 +26,38 @@ document.addEventListener('DOMContentLoaded', function() {
     verificarSesionYCargarTarjetas();
 });
 
-/**
- * Verifica si hay sesión activa y carga las tarjetas correspondientes
- */
+const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function(event) {
+            event.preventDefault();
+            if (confirm('¿Cerrar sesión?')) {
+                try {
+                    const response = await fetch(API_CONFIG.baseUrl + '?seccion=usuarios&accion=logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert('Sesión cerrada correctamente.');
+                        estadoApp.usuarioLogueado = false;
+                        const userInfo = document.getElementById('user-info');
+                        if (userInfo) userInfo.style.display = 'none';
+                        const headerTitle = document.querySelector('header h1');
+                        if (headerTitle) headerTitle.textContent = '🐉 Guerreros Legendarios Z 🐉';
+
+                        await cargarTodasTarjetas();
+                    } else {
+                        alert('Error al cerrar sesión: ' + (data.error || 'desconocido'));
+                    }
+                } catch (error) {
+                    alert('Error en la comunicación con el servidor.');
+                    console.error(error);
+                }
+            }
+        });
+    }
+
 async function verificarSesionYCargarTarjetas() {
     try {
         mostrarCargando();

@@ -7,11 +7,20 @@ class Usuario {
     }
 
     public function login($username, $password) {
-        $sql = "SELECT * FROM usuarios WHERE username = ? AND password = MD5(?) LIMIT 1";
+        $sql = "SELECT * FROM usuarios WHERE username = ? LIMIT 1";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ss", $username, $password);
+        $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_assoc();
+        $usuario = $result->fetch_assoc();
+
+        if ($usuario && password_verify($password, $usuario['password'])) {
+            return $usuario;
+        } else {
+            return false;
+        }
     }
 }
+
+
+?>
